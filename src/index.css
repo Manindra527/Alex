@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 25% 98%;
+    --foreground: 20 10% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 10% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 10% 12%;
+
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 30 30% 95%;
+    --secondary-foreground: 20 10% 25%;
+
+    --muted: 30 15% 93%;
+    --muted-foreground: 20 8% 50%;
+
+    --accent: 24 100% 96%;
+    --accent-foreground: 24 95% 40%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 30 15% 90%;
+    --input: 30 15% 90%;
+    --ring: 24 95% 53%;
+
+    --radius: 1rem;
+
+    --gradient-primary: linear-gradient(135deg, hsl(24 95% 53%), hsl(32 95% 58%));
+    --gradient-warm: linear-gradient(135deg, hsl(24 95% 53%), hsl(16 90% 48%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(30 25% 97%));
+
+    --shadow-sm: 0 1px 3px hsl(24 20% 50% / 0.08);
+    --shadow-md: 0 4px 12px hsl(24 20% 50% / 0.1);
+    --shadow-lg: 0 8px 24px hsl(24 20% 50% / 0.12);
+    --shadow-orange: 0 4px 16px hsl(24 95% 53% / 0.25);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 30% 95%;
+    --sidebar-accent-foreground: 20 10% 25%;
+    --sidebar-border: 30 15% 90%;
+    --sidebar-ring: 24 95% 53%;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 96%;
+
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 96%;
+
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 96%;
+
+    --primary: 24 95% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 11%;
+    --secondary-foreground: 0 0% 92%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 64%;
+
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 88%;
+
+    --destructive: 0 75% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 62% 44%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 24 95% 58%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(24 95% 58%), hsl(32 95% 62%));
+    --gradient-warm: linear-gradient(135deg, hsl(24 95% 58%), hsl(12 85% 54%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 8%), hsl(0 0% 4%));
+
+    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.28);
+    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.34);
+    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.42);
+    --shadow-orange: 0 6px 18px hsl(24 95% 53% / 0.26);
+
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 24 95% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 24 95% 58%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  .gradient-warm {
+    background: var(--gradient-warm);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-md);
+  }
+  .shadow-card-lg {
+    box-shadow: var(--shadow-lg);
+  }
+  .shadow-orange {
+    box-shadow: var(--shadow-orange);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
