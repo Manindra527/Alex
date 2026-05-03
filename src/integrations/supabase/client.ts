@@ -162,15 +162,17 @@ class QueryBuilder {
   update(payload: Row) { this.op = "update"; this.payload = payload; return this; }
   delete() { this.op = "delete"; return this; }
 
-  // Promise interface
-  then<TResult1 = { data: unknown; error: unknown }, TResult2 = never>(
-    onfulfilled?: ((value: { data: unknown; error: unknown }) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  then<TResult1 = { data: any; error: any }, TResult2 = never>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onfulfilled?: ((value: { data: any; error: any }) => TResult1 | PromiseLike<TResult1>) | undefined | null,
     onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null,
   ): Promise<TResult1 | TResult2> {
     return this.execute().then(onfulfilled as never, onrejected as never);
   }
 
-  private async execute(): Promise<{ data: unknown; error: unknown }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async execute(): Promise<{ data: any; error: any }> {
     try {
       const body = {
         op: this.op,
