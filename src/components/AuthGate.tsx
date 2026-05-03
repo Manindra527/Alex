@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
+import type { Session } from "@/integrations/supabase/client";
 import Index from "@/pages/Index";
 import AuthPage, { type AuthPageMode } from "@/pages/AuthPage";
 import { supabase } from "@/integrations/supabase/client";
