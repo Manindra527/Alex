@@ -394,7 +394,7 @@ const generatePlanFromDate = (setup: PlannerSetup, startDate: string, minimumDay
    const slots = Math.floor(totalDailyMinutes / SESSION_MINUTES);
     
     plan[dateKey] = Array.from({ length: slots }, (_, slotIndex) => {
-      const startMinutes = 360 + slotIndex * slotMinutes;
+      const startMinutes = 360 + slotIndex * SESSION_MINUTES;
       return {
         id: `generated-${dateKey}-${slotIndex}`,
         date: dateKey,
