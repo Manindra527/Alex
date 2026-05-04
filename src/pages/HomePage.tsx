@@ -176,7 +176,7 @@ const HomePage = ({ isAuthenticated, onRequireAuth }: HomePageProps) => {
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.completed ? "bg-success" : "bg-primary"}`} />
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium ${item.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                    {item.subject}
+                    {item.subject} ({item.sessionType})
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatDisplayTimeRange(item.startTime, item.endTime)}
