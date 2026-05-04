@@ -41,7 +41,6 @@ const isSignIn = mode === "sign-in";
 const handleSignUp = async (event: FormEvent<HTMLFormElement>) => {
 event.preventDefault();
 
-```
 if (!fullName || !email || !password || !confirmPassword) {
   toast.error("Fill all fields");
   return;
@@ -79,7 +78,7 @@ try {
 }
 
 setIsSubmitting(false);
-```
+
 
 };
 
@@ -87,7 +86,6 @@ setIsSubmitting(false);
 const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
 event.preventDefault();
 
-```
 if (!email || !password) {
   toast.error("Enter email & password");
   return;
@@ -119,7 +117,6 @@ try {
 }
 
 setIsSubmitting(false);
-```
 
 };
 
@@ -131,7 +128,6 @@ return void handleSignIn(event);
 const content = ( <div className="max-w-lg mx-auto w-full"> <div className="rounded-2xl bg-card p-6 shadow"> <h1 className="text-2xl font-bold mb-4">
 {isSignUp ? "Create Account" : "Sign In"} </h1>
 
-```
     <div className="flex gap-2 mb-4">
       <button onClick={() => setMode("sign-up")}>Sign Up</button>
       <button onClick={() => setMode("sign-in")}>Sign In</button>
@@ -174,7 +170,7 @@ const content = ( <div className="max-w-lg mx-auto w-full"> <div className="roun
     </form>
   </div>
 </div>
-```
+
 
 );
 
