@@ -430,8 +430,8 @@ const PlannerPage = () => {
   const [setupHours, setSetupHours] = useState("2");
   const [subjectInputs, setSubjectInputs] = useState([""]);
   const [planData, setPlanData] = useState<Record<string, TimeBlock[]>>(loadPlanData() ?? {});
-  const [selectedDate, setSelectedDate] = useState(SAMPLE_ACTIVE_DATE);
-  const [calendarDate, setCalendarDate] = useState(SAMPLE_ACTIVE_DATE);
+  const [selectedDate, setSelectedDate] = useState(TODAY_DATE_KEY);
+  const [calendarDate, setCalendarDate] = useState(TODAY_DATE_KEY);
   const [isPlannerLoading, setIsPlannerLoading] = useState(true);
   const [showHoliday, setShowHoliday] = useState(false);
   const [showHolidayAdjustment, setShowHolidayAdjustment] = useState(false);
