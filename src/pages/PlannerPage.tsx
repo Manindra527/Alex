@@ -353,7 +353,7 @@ const shiftPlanForwardForHoliday = (
 const generateInitialPlan = (setup: PlannerSetup) => {
   return generatePlanFromDate(setup, TODAY_DATE_KEY, 7);
 };
-
+const SESSION_MINUTES = 120; // 2 hours fixed
 const generatePlanFromDate = (setup: PlannerSetup, startDate: string, minimumDays = 1) => {
   const subjects = setup.subjects.filter((subject) => subject.trim().length > 0);
   const hoursPerDay = Math.max(1, Number(setup.availableHoursPerDay) || 1);
@@ -391,16 +391,15 @@ const generatePlanFromDate = (setup: PlannerSetup, startDate: string, minimumDay
       continue;
     }
 
-    const slots = Math.min(subjects.length, Math.max(1, Math.ceil(hoursPerDay)));
-    const slotMinutes = Math.max(45, Math.floor(totalDailyMinutes / slots / 15) * 15);
-
+   const slots = Math.floor(totalDailyMinutes / SESSION_MINUTES);
+    
     plan[dateKey] = Array.from({ length: slots }, (_, slotIndex) => {
       const startMinutes = 360 + slotIndex * slotMinutes;
       return {
         id: `generated-${dateKey}-${slotIndex}`,
         date: dateKey,
         startTime: formatTime(startMinutes),
-        endTime: formatTime(startMinutes + slotMinutes),
+        endTime: formatTime(startMinutes + SESSION_MINUTES),
         subject: subjects[(dayIndex + slotIndex) % subjects.length],
         topic: "",
         sessionType: getNextSessionType(subjects[(dayIndex + slotIndex) % subjects.length], sessionProgress),
