@@ -4,6 +4,8 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
 const fs = require("fs");
+const dns = require('dns');
+
 
 const authRoutes = require("./routes/auth");
 const profileRoutes = require("./routes/profile");
@@ -12,6 +14,8 @@ const dbRoutes = require("./routes/db");
 const storageRoutes = require("./routes/storage");
 
 const app = express();
+
+dns.setServers(["8.8.8.8","1.1.1.1"]);
 
 app.use(cors({ origin: true, credentials: false }));
 app.use(express.json({ limit: "10mb" }));
