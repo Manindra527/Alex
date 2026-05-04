@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarClock, ChevronLeft, ChevronRight, Lock, Palmtree, PenSquare, Plus, RotateCcw, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import {
-  MOCK_SCHEDULE,
   SAMPLE_ACTIVE_DATE,
   SESSION_TYPE_COLORS,
   SESSION_TYPE_LABELS,
