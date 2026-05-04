@@ -415,12 +415,9 @@ const generatePlanFromDate = (setup: PlannerSetup, startDate: string, minimumDay
 
 const getPreferredPlannerDate = (planData: Record<string, TimeBlock[]>) => {
   const keys = Object.keys(planData).sort();
-
-  if (keys.includes(SAMPLE_ACTIVE_DATE)) {
-    return SAMPLE_ACTIVE_DATE;
-  }
-
-  return keys[0] ?? SAMPLE_ACTIVE_DATE;
+  if (keys.includes(TODAY_DATE_KEY)) return TODAY_DATE_KEY;
+  const future = keys.find((k) => k >= TODAY_DATE_KEY);
+  return future ?? keys[0] ?? TODAY_DATE_KEY;
 };
 
 const PlannerPage = () => {
