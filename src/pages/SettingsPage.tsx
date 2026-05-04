@@ -379,8 +379,16 @@ const SettingsPage = ({ onBack }: SettingsPageProps) => {
   };
 
   const handleResetData = async () => {
-    localStorage.removeItem(PLANNER_SETUP_KEY);
-    localStorage.removeItem(PLANNER_PLAN_KEY);
+    // Clear all related localStorage keys
+    const keys = [
+      PLANNER_SETUP_KEY,
+      PLANNER_PLAN_KEY,
+      "ai-mentor-journal-entries",
+      "ai-mentor-doubts",
+      "ai-mentor-mock-scores",
+      "ai-mentor-study-timer",
+    ];
+    keys.forEach((k) => localStorage.removeItem(k));
 
     const { data, error } = await supabase.auth.getUser();
     if (!error && data.user) {
@@ -395,16 +403,14 @@ const SettingsPage = ({ onBack }: SettingsPageProps) => {
         return;
       }
 
-      const { error: saveError } = await supabase.auth.updateUser({ data: nextMetadata });
-      if (saveError) {
-        toast.error("Local data was reset, but account sync could not be updated.");
-        return;
-      }
+      await supabase.auth.updateUser({ data: nextMetadata });
     }
 
     toast.success("Study data reset.");
     setShowResetDialog(false);
     setView("menu");
+    // Force a clean reload so all pages re-fetch from a now-empty backend.
+    setTimeout(() => window.location.reload(), 300);
   };
 
   const handleDeleteAccount = () => {

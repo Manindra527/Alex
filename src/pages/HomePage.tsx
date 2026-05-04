@@ -1,42 +1,46 @@
-import { Flame, Target, TrendingUp, Sparkles, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Flame, Target, TrendingUp, Sparkles, Calendar, Check } from "lucide-react";
+import { toast } from "sonner";
 import StudyTimer from "@/components/StudyTimer";
-import {
-  MOCK_JOURNAL_ENTRIES,
-  MOCK_SCHEDULE,
-  MOOD_EMOJIS,
-  SAMPLE_ACTIVE_DATE,
-} from "@/lib/store";
+import { type TimeBlock } from "@/lib/store";
 import { formatDisplayTime, formatDisplayTimeRange } from "@/lib/time";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchOwnPlanner,
+  fetchOwnPlannerEntries,
+  plannerEntriesToPlanData,
+  upsertOwnPlannerWithEntries,
+} from "@/lib/planners";
+
+const PLANNER_PLAN_KEY = "ai-mentor-plan-data";
+const PLANNER_SETUP_KEY = "ai-mentor-planner-setup";
 
 const getMinutes = (startTime: string, endTime: string) => {
-  const [startHour, startMinute] = startTime.split(":").map(Number);
-  const [endHour, endMinute] = endTime.split(":").map(Number);
-  return endHour * 60 + endMinute - (startHour * 60 + startMinute);
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+  const d = eh * 60 + em - (sh * 60 + sm);
+  return d > 0 ? d : d + 24 * 60;
 };
 
-const formatMood = (mood: string) => mood.charAt(0).toUpperCase() + mood.slice(1);
+const formatDateKey = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+const TODAY_KEY = formatDateKey(new Date());
 
 const calculateStreak = (dates: string[]) => {
-  const uniqueDates = [...new Set(dates)].sort();
+  const unique = [...new Set(dates)].sort();
   let streak = 0;
-
-  for (let index = uniqueDates.length - 1; index >= 0; index -= 1) {
-    if (index === uniqueDates.length - 1) {
-      streak = 1;
-      continue;
-    }
-
-    const current = new Date(uniqueDates[index]);
-    const next = new Date(uniqueDates[index + 1]);
-    const differenceInDays = (next.getTime() - current.getTime()) / (1000 * 60 * 60 * 24);
-
-    if (differenceInDays === 1) {
-      streak += 1;
-    } else {
-      break;
-    }
+  for (let i = unique.length - 1; i >= 0; i--) {
+    if (i === unique.length - 1) { streak = 1; continue; }
+    const cur = new Date(unique[i]);
+    const next = new Date(unique[i + 1]);
+    if ((next.getTime() - cur.getTime()) / 86400000 === 1) streak++;
+    else break;
   }
-
   return streak;
 };
 
@@ -46,23 +50,77 @@ interface HomePageProps {
 }
 
 const HomePage = ({ isAuthenticated, onRequireAuth }: HomePageProps) => {
+  const [planData, setPlanData] = useState<Record<string, TimeBlock[]>>({});
+  const [plannerSetup, setPlannerSetup] = useState<{ targetExam: string; examDate: string; availableHoursPerDay: number; subjects: string[] } | null>(null);
+
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
 
-  const todayPlan = MOCK_SCHEDULE.filter((block) => block.date === SAMPLE_ACTIVE_DATE);
-  const todayJournal = MOCK_JOURNAL_ENTRIES.filter((entry) => entry.date === SAMPLE_ACTIVE_DATE);
-  const completedSessions = MOCK_SCHEDULE.filter((block) => block.completed);
-  const completedTodayMinutes = todayPlan
-    .filter((block) => block.completed)
-    .reduce((total, block) => total + getMinutes(block.startTime, block.endTime), 0);
-  const doneCount = todayPlan.filter((block) => block.completed).length;
-  const discipline = Math.round((completedSessions.length / MOCK_SCHEDULE.length) * 100);
-  const streak = calculateStreak(completedSessions.map((block) => block.date));
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!mounted) return;
+      if (!data.user) {
+        try {
+          const raw = localStorage.getItem(PLANNER_PLAN_KEY);
+          if (raw) setPlanData(JSON.parse(raw));
+          const setupRaw = localStorage.getItem(PLANNER_SETUP_KEY);
+          if (setupRaw) setPlannerSetup(JSON.parse(setupRaw));
+        } catch { /* noop */ }
+        return;
+      }
+      const [{ data: planner }, { data: entries }] = await Promise.all([
+        fetchOwnPlanner(data.user.id),
+        fetchOwnPlannerEntries(data.user.id),
+      ]);
+      if (!mounted) return;
+      if (entries && entries.length > 0) setPlanData(plannerEntriesToPlanData(entries));
+      else setPlanData({});
+      if (planner && planner.target_exam) {
+        setPlannerSetup({
+          targetExam: planner.target_exam,
+          examDate: planner.exam_date ?? "",
+          availableHoursPerDay: Number(planner.available_hours_per_day ?? 0),
+          subjects: planner.subjects ?? [],
+        });
+      }
+    };
+    void load();
+    return () => { mounted = false; };
+  }, []);
+
+  const todayPlan = (planData[TODAY_KEY] ?? []).slice().sort((a, b) => a.startTime.localeCompare(b.startTime));
+  const allBlocks = Object.values(planData).flat();
+  const completedAll = allBlocks.filter((b) => b.completed);
+  const completedTodayMinutes = todayPlan.filter((b) => b.completed).reduce((t, b) => t + getMinutes(b.startTime, b.endTime), 0);
+  const doneCount = todayPlan.filter((b) => b.completed).length;
+  const discipline = allBlocks.length > 0 ? Math.round((completedAll.length / allBlocks.length) * 100) : 0;
+  const streak = calculateStreak(completedAll.map((b) => b.date));
   const todayHours = (completedTodayMinutes / 60).toFixed(1);
-  const nextPendingSession = todayPlan.find((block) => !block.completed);
-  const suggestion = nextPendingSession
-    ? `Your next focus block is ${nextPendingSession.subject} at ${formatDisplayTime(nextPendingSession.startTime)}. Finish that before starting anything new.`
-    : "You cleared today's sample plan. Use the next hour for light revision or mock analysis.";
+  const nextPending = todayPlan.find((b) => !b.completed);
+  const suggestion = nextPending
+    ? `Your next focus block is ${nextPending.subject} at ${formatDisplayTime(nextPending.startTime)}. Finish that before starting anything new.`
+    : todayPlan.length > 0
+      ? "You cleared today's plan. Use the next hour for light revision."
+      : "No sessions scheduled for today. Open the Planner to add one.";
+
+  const toggleDone = async (block: TimeBlock) => {
+    if (!isAuthenticated) { onRequireAuth(); return; }
+    const updated = { ...block, completed: !block.completed };
+    const next: Record<string, TimeBlock[]> = { ...planData };
+    next[block.date] = (planData[block.date] ?? []).map((b) => (b.id === block.id ? updated : b));
+    setPlanData(next);
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) return;
+    const { error } = await upsertOwnPlannerWithEntries(data.user.id, plannerSetup, next);
+    if (error) {
+      toast.error("Could not update task.");
+      setPlanData(planData); // rollback
+    } else {
+      try { localStorage.setItem(PLANNER_PLAN_KEY, JSON.stringify(next)); } catch { /* noop */ }
+    }
+  };
 
   return (
     <div className="h-full min-h-0 flex flex-col">
@@ -105,6 +163,9 @@ const HomePage = ({ isAuthenticated, onRequireAuth }: HomePageProps) => {
             </span>
           </div>
           <div className="space-y-2.5">
+            {todayPlan.length === 0 && (
+              <p className="text-sm text-muted-foreground">No sessions scheduled for today.</p>
+            )}
             {todayPlan.map((item) => (
               <div
                 key={item.id}
@@ -121,7 +182,19 @@ const HomePage = ({ isAuthenticated, onRequireAuth }: HomePageProps) => {
                     {formatDisplayTimeRange(item.startTime, item.endTime)}
                   </p>
                 </div>
-                {item.completed && <span className="text-xs font-medium text-success">Done</span>}
+                <button
+                  type="button"
+                  onClick={() => toggleDone(item)}
+                  className={`flex-shrink-0 inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    item.completed
+                      ? "bg-success/20 text-success"
+                      : "bg-primary/10 text-primary hover:bg-primary/20"
+                  }`}
+                  aria-label={item.completed ? "Mark not done" : "Mark done"}
+                >
+                  <Check size={12} />
+                  {item.completed ? "Done" : "Mark Done"}
+                </button>
               </div>
             ))}
           </div>
@@ -134,20 +207,6 @@ const HomePage = ({ isAuthenticated, onRequireAuth }: HomePageProps) => {
               <h4 className="font-semibold text-primary-foreground text-sm">AI Suggestion</h4>
               <p className="text-primary-foreground/90 text-sm mt-1 leading-relaxed">{suggestion}</p>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-card rounded-2xl shadow-card p-5">
-          <h3 className="font-semibold text-foreground mb-3">Today&apos;s Mood Log</h3>
-          <div className="space-y-2">
-            {todayJournal.map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between p-3 bg-accent rounded-xl">
-                <span className="text-sm text-foreground font-medium">{entry.topic}</span>
-                <span className="text-sm">
-                  {MOOD_EMOJIS[entry.mood]} {formatMood(entry.mood)}
-                </span>
-              </div>
-            ))}
           </div>
         </div>
       </div>

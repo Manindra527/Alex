@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarClock, ChevronLeft, ChevronRight, Lock, Palmtree, PenSquare, Plus, RotateCcw, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import {
-  MOCK_SCHEDULE,
   SAMPLE_ACTIVE_DATE,
   SESSION_TYPE_COLORS,
   SESSION_TYPE_LABELS,
@@ -415,12 +414,9 @@ const generatePlanFromDate = (setup: PlannerSetup, startDate: string, minimumDay
 
 const getPreferredPlannerDate = (planData: Record<string, TimeBlock[]>) => {
   const keys = Object.keys(planData).sort();
-
-  if (keys.includes(SAMPLE_ACTIVE_DATE)) {
-    return SAMPLE_ACTIVE_DATE;
-  }
-
-  return keys[0] ?? SAMPLE_ACTIVE_DATE;
+  if (keys.includes(TODAY_DATE_KEY)) return TODAY_DATE_KEY;
+  const future = keys.find((k) => k >= TODAY_DATE_KEY);
+  return future ?? keys[0] ?? TODAY_DATE_KEY;
 };
 
 const PlannerPage = () => {
@@ -430,8 +426,8 @@ const PlannerPage = () => {
   const [setupHours, setSetupHours] = useState("2");
   const [subjectInputs, setSubjectInputs] = useState([""]);
   const [planData, setPlanData] = useState<Record<string, TimeBlock[]>>(loadPlanData() ?? {});
-  const [selectedDate, setSelectedDate] = useState(SAMPLE_ACTIVE_DATE);
-  const [calendarDate, setCalendarDate] = useState(SAMPLE_ACTIVE_DATE);
+  const [selectedDate, setSelectedDate] = useState(TODAY_DATE_KEY);
+  const [calendarDate, setCalendarDate] = useState(TODAY_DATE_KEY);
   const [isPlannerLoading, setIsPlannerLoading] = useState(true);
   const [showHoliday, setShowHoliday] = useState(false);
   const [showHolidayAdjustment, setShowHolidayAdjustment] = useState(false);
@@ -594,21 +590,7 @@ const PlannerPage = () => {
     };
   }, [plannerSetup, planData, isPlannerLoading]);
 
-  useEffect(() => {
-    if (!plannerSetup && Object.keys(planData).length === 0) {
-      const samplePlan = MOCK_SCHEDULE.reduce<Record<string, TimeBlock[]>>((accumulator, block) => {
-        if (!accumulator[block.date]) {
-          accumulator[block.date] = [];
-        }
-        accumulator[block.date].push(block);
-        return accumulator;
-      }, {});
-
-      setPlanData(samplePlan);
-      setSelectedDate(SAMPLE_ACTIVE_DATE);
-      setCalendarDate(SAMPLE_ACTIVE_DATE);
-    }
-  }, [plannerSetup, planData]);
+  // Sample MOCK_SCHEDULE seeding removed — was leaking dummy data into MongoDB.
 
   useEffect(() => {
     return () => {
