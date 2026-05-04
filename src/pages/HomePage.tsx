@@ -182,7 +182,7 @@ const HomePage = ({ isAuthenticated, onRequireAuth }: HomePageProps) => {
     </p>
 
     <span
-      className={`text-xs font-semibold px-2 py-1 rounded-md ${
+      className={`text-xs font-semibold px-1 py-0.5 rounded-md ${
         SESSION_TYPE_COLORS[item.sessionType]
       }`}
     >
