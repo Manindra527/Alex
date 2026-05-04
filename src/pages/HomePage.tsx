@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SESSION_TYPE_COLORS, SESSION_TYPE_LABELS } from "@/lib/store";
 import { Flame, Target, TrendingUp, Sparkles, Calendar, Check } from "lucide-react";
 import { toast } from "sonner";
 import StudyTimer from "@/components/StudyTimer";
@@ -176,8 +177,15 @@ const HomePage = ({ isAuthenticated, onRequireAuth }: HomePageProps) => {
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.completed ? "bg-success" : "bg-primary"}`} />
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium ${item.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                    {item.subject} ({item.sessionType})
+                    {item.subject}
                   </p>
+                    <span
+    className={`text-xs font-semibold px-2 py-1 rounded-md ${
+      SESSION_TYPE_COLORS[item.sessionType]
+    }`}
+  >
+    {SESSION_TYPE_LABELS[item.sessionType]}
+  </span>
                   <p className="text-xs text-muted-foreground">
                     {formatDisplayTimeRange(item.startTime, item.endTime)}
                   </p>
