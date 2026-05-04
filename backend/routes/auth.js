@@ -13,31 +13,23 @@ const toClient = (user) => ({
   user_metadata: user.user_metadata || {},
 });
 
-// POST /api/auth — login if user exists, signup if not
-router.post("/", async (req, res) => {
+// POST /api/auth/login
+router.post("/login", async (req, res) => {
   try {
-    const { email, password, full_name } = req.body || {};
-    if (!email || !password) return res.status(400).json({ error: "Email and password required." });
+    const { email, password } = req.body || {};
+    if (!email || !password)
+      return res.status(400).json({ error: "Email and password required." });
 
     const normEmail = String(email).trim().toLowerCase();
-    let user = await User.findOne({ email: normEmail });
+    const user = await User.findOne({ email: normEmail });
 
-    if (user) {
-      const match = await bcrypt.compare(password, user.password_hash);
-      if (!match) return res.status(401).json({ error: "Invalid login credentials" });
-    } else {
-      const password_hash = await bcrypt.hash(password, 10);
-      user = await User.create({
-        email: normEmail,
-        password_hash,
-        user_metadata: full_name ? { full_name: String(full_name).trim() } : {},
-      });
-      // auto-create empty profile
-      await Profile.findByIdAndUpdate(
-        String(user._id),
-        { _id: String(user._id), full_name: full_name ? String(full_name).trim() : null },
-        { upsert: true, setDefaultsOnInsert: true, new: true }
-      );
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+      return res.status(401).json({ error: "Invalid login credentials" });
     }
 
     const token = sign(user);
@@ -46,6 +38,49 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+
+// POST /api/auth/signup
+router.post("/signup", async (req, res) => {
+  try {
+    const { email, password, full_name } = req.body || {};
+    if (!email || !password)
+      return res.status(400).json({ error: "Email and password required." });
+
+    const normEmail = String(email).trim().toLowerCase();
+
+    const existing = await User.findOne({ email: normEmail });
+    if (existing) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      email: normEmail,
+      password_hash,
+      user_metadata: full_name
+        ? { full_name: String(full_name).trim() }
+        : {},
+    });
+
+    // create profile
+    await Profile.findByIdAndUpdate(
+      String(user._id),
+      {
+        _id: String(user._id),
+        full_name: full_name ? String(full_name).trim() : null,
+      },
+      { upsert: true }
+    );
+
+    const token = sign(user);
+    res.json({ user: toClient(user), token });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 
 // POST /api/auth/update — update password and/or user_metadata
 router.post("/update", verifyToken, async (req, res) => {
