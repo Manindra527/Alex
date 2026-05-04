@@ -176,16 +176,19 @@ const HomePage = ({ isAuthenticated, onRequireAuth }: HomePageProps) => {
               >
                 <div className={`w-2 h-2 rounded-full flex-shrink-0 ${item.completed ? "bg-success" : "bg-primary"}`} />
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${item.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                    {item.subject}
-                  </p>
-                    <span
-    className={`text-xs font-semibold px-2 py-1 rounded-md ${
-      SESSION_TYPE_COLORS[item.sessionType]
-    }`}
-  >
-    {SESSION_TYPE_LABELS[item.sessionType]}
-  </span>
+                  <div className="flex items-center gap-2">
+    <p className={`text-sm font-medium ${item.completed ? "text-muted-foreground line-through" : "text-foreground"}`}>
+      {item.subject}
+    </p>
+
+    <span
+      className={`text-xs font-semibold px-2 py-1 rounded-md ${
+        SESSION_TYPE_COLORS[item.sessionType]
+      }`}
+    >
+      {SESSION_TYPE_LABELS[item.sessionType]}
+    </span>
+  </div>
                   <p className="text-xs text-muted-foreground">
                     {formatDisplayTimeRange(item.startTime, item.endTime)}
                   </p>
