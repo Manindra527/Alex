@@ -594,21 +594,7 @@ const PlannerPage = () => {
     };
   }, [plannerSetup, planData, isPlannerLoading]);
 
-  useEffect(() => {
-    if (!plannerSetup && Object.keys(planData).length === 0) {
-      const samplePlan = MOCK_SCHEDULE.reduce<Record<string, TimeBlock[]>>((accumulator, block) => {
-        if (!accumulator[block.date]) {
-          accumulator[block.date] = [];
-        }
-        accumulator[block.date].push(block);
-        return accumulator;
-      }, {});
-
-      setPlanData(samplePlan);
-      setSelectedDate(SAMPLE_ACTIVE_DATE);
-      setCalendarDate(SAMPLE_ACTIVE_DATE);
-    }
-  }, [plannerSetup, planData]);
+  // Sample MOCK_SCHEDULE seeding removed — was leaking dummy data into MongoDB.
 
   useEffect(() => {
     return () => {
