@@ -71,10 +71,12 @@ const ProgressPage = () => {
   }, [tab, allBlocks]);
 
   const studyData = useMemo(() => {
-    const totals = timeframeSchedule.reduce<Record<string, number>>((acc, b) => {
-      acc[b.date] = (acc[b.date] || 0) + getMinutes(b.startTime, b.endTime) / 60;
-      return acc;
-    }, {});
+    const totals = timeframeSchedule
+  .filter((b) => b.completed)
+  .reduce<Record<string, number>>((acc, b) => {
+    acc[b.date] = (acc[b.date] || 0) + getMinutes(b.startTime, b.endTime) / 60;
+    return acc;
+  }, {});
     if (tab === "daily") {
       return Object.entries(totals).map(([date, hours]) => ({
         day: new Date(`${date}T00:00:00`).toLocaleDateString("en-US", { weekday: "short" }),
@@ -103,7 +105,9 @@ const ProgressPage = () => {
   const timeframeDays = tab === "daily" ? 1 : tab === "weekly" ? 7 : 30;
   const consistency = Math.round((completedDays / timeframeDays) * 100);
 
-  const subjectMinutes = timeframeSchedule.reduce<Record<string, number>>((acc, b) => {
+  const subjectMinutes = timeframeSchedule
+  .filter((b) => b.completed)
+  .reduce<Record<string, number>>((acc, b) => {
     acc[b.subject] = (acc[b.subject] || 0) + getMinutes(b.startTime, b.endTime);
     return acc;
   }, {});
